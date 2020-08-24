@@ -4,6 +4,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
 import sys
+import random as rn
 import numpy as np
 import pandas as pd
 
@@ -14,8 +15,14 @@ from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 from sklearn.neighbors import LocalOutlierFactor
 
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Conv1D, Dense, Flatten, MaxPooling1D
+from tensorflow.keras.layers import Input, Conv1D, Dense, Flatten, MaxPooling1D, Dropout
 from tensorflow.keras.models import Model
+
+# set random seed
+os.environ['PYTHONHASHSEED'] = '0'
+np.random.seed(42)
+rn.seed(12345)
+tf.random.set_seed(1234)
 
 ################################################################################
 #! I/O naming
@@ -26,6 +33,7 @@ from tensorflow.keras.models import Model
 #===========================================================
 
 # file_name = ".DAJIN_temp/data/DAJIN_MIDS_sim.txt"
+# mutation_type = "S"
 # threads = 12
 
 #===========================================================
@@ -34,7 +42,11 @@ from tensorflow.keras.models import Model
 
 args = sys.argv
 file_name = args[1]
-threads = int(args[2])
+mutation_type = args[2]
+threads = int(args[3])
+
+if mutation_type == "":
+    raise ValueError("mutation_type is empty")
 
 if threads == "":
     import multiprocessing
@@ -88,38 +100,54 @@ X_train, X_val, Y_train, Y_val = train_test_split(
 #===========================================================
 
 inputs = Input(shape = (X_train.shape[1], X_train.shape[2]))
-init_kernel_size = int(256)
+if mutation_type == "S":
+    init_kernel_size = int(16)
+    init_pool_size = int(4)
+else:
+    init_kernel_size = int(256)
+    init_pool_size = int(16)
 
 x = Conv1D(
-        filters=32,
+        filters=16,
         kernel_size=init_kernel_size,
         activation="relu",
         name="1st_Conv1D",
         padding="same",
     )(inputs)
-x = MaxPooling1D(pool_size=12, padding="same", name="1st_MaxPooling1D")(x)
+x = MaxPooling1D(pool_size=init_pool_size, padding="same", name="1st_MaxPooling1D")(x)
 
 x = Conv1D(
         filters=32,
-        kernel_size=int(init_kernel_size / 2),
+        kernel_size=int(init_kernel_size/4) ,
         activation="relu",
         name="2nd_Conv1D",
         padding="same",
     )(x)
-x = MaxPooling1D(pool_size=6, padding="same", name="2nd_MaxPooling1D")(x)
+x = MaxPooling1D(pool_size=int(init_kernel_size/2), padding="same", name="2nd_MaxPooling1D")(x)
 
 x = Conv1D(
-        filters=32,
-        kernel_size=int(init_kernel_size / 4),
+        filters=64,
+        kernel_size=int(init_kernel_size/2),
         activation="relu",
         name="3rd_Conv1D",
         padding="same",
     )(x)
-x = MaxPooling1D(pool_size=3, padding="same", name="3rd_MaxPooling1D")(x)
+x = MaxPooling1D(pool_size=int(init_kernel_size/4), padding="same", name="3rd_MaxPooling1D")(x)
+
+x = Conv1D(
+        filters=128,
+        kernel_size=int(init_kernel_size/2),
+        activation="relu",
+        name="4_Conv1D",
+        padding="same",
+    )(x)
+x = MaxPooling1D(pool_size=int(init_kernel_size/4), padding="same", name="4_MaxPooling1D")(x)
 
 x = Flatten(name="flatten")(x)
-
-x = Dense(32, activation="relu", name="1st_FC")(x)
+x = Dense(1024, activation="relu", name="FC_1")(x)
+x = Dropout(0.5)(x)
+x = Dense(128, activation="relu", name="FC_2")(x)
+x = Dropout(0.5)(x)
 
 predictions = Dense(len(labels_index), activation="softmax", name="softmax")(x)
 
@@ -152,7 +180,7 @@ model.fit(
 #? Extract layer
 #===========================================================
 
-model_ = Model(model.get_layer(index=0).input, model.get_layer(index=-2).output)
+model_ = Model(model.get_layer(index=0).input, model.get_layer(index=-3).output)
 train_vector = model_.predict(X_train, verbose=0, batch_size=32)
 
 #===========================================================

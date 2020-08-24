@@ -73,7 +73,7 @@ cat .DAJIN_temp/data/MIDS_"${control}"_wt |
 cat >> ".DAJIN_temp/data/DAJIN_MIDS_sim.txt"
 
 python ./DAJIN/src/ml_simulated.py \
-    ".DAJIN_temp/data/DAJIN_MIDS_sim.txt" "${threads}" >&2
+    ".DAJIN_temp/data/DAJIN_MIDS_sim.txt" "${mutation_type}" "${threads}" >&2
 
 ################################################################################
 #! Predict allele type
