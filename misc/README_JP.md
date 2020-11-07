@@ -14,9 +14,15 @@ LinuxまたはWindows 10 ([WSL](https://docs.microsoft.com/ja-jp/windows/wsl/ins
 
 ### `conda`をインストールします
 
-下記のURLにしたがい, `conda`をインストールします.  
 
-- [conda](https://docs.conda.io/en/latest/miniconda.html)
+```
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+chmod +x Miniconda3-latest-Linux-x86_64.sh
+./Miniconda3-latest-Linux-x86_64.sh
+```
+
+condaおよびインストールについての詳細は[こちら](https://docs.conda.io/projects/conda/en/latest/)にございます.  
+
 
 ### DAJINをダウンロードします
 
