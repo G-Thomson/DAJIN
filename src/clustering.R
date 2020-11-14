@@ -29,7 +29,7 @@ hdbscan <- reticulate::import("hdbscan")
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode24"
+# barcode <- "barcode08"
 # allele <- "wt"
 
 # if (allele == "abnormal") control_allele <- "wt"
@@ -195,7 +195,7 @@ output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
 input_hdbscan <- output_pca
 
 min_cluster_sizes <-
-    seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.5, length = 25) %>%
+    seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.3, length = 30) %>%
     as.integer %>%
     `+`(2L) %>%
     unique
@@ -245,68 +245,68 @@ int_hdbscan_clusters <- clustering_hdbscan$fit_predict(input_hdbscan) + 1
 
 #* TEST ========================================================
 
-#? REPEAT CLUSTERING
+# #? REPEAT CLUSTERING
 
-hdbscan_clusters <- int_hdbscan_clusters
-stop_cl_number <- NA
+# hdbscan_clusters <- int_hdbscan_clusters
+# stop_cl_number <- NA
 
-while (!identical(unique(hdbscan_clusters), stop_cl_number)) {
-    for (cluster in unique(hdbscan_clusters) %>%  sort) {
-        stop_cl_number <- unique(hdbscan_clusters)
-        if(df_score[hdbscan_clusters == cluster, pca_hotelling] %>% n_distinct == 1) next
+# while (!identical(unique(hdbscan_clusters), stop_cl_number)) {
+#     for (cluster in unique(hdbscan_clusters) %>%  sort) {
+#         stop_cl_number <- unique(hdbscan_clusters)
+#         if(df_score[hdbscan_clusters == cluster, pca_hotelling] %>% n_distinct == 1) next
 
-        pca_cluster <- prcomp(df_score[hdbscan_clusters == cluster, pca_hotelling], scale = FALSE)
+#         pca_cluster <- prcomp(df_score[hdbscan_clusters == cluster, pca_hotelling], scale = FALSE)
 
-        if (ncol(pca_cluster$x) > length(num_components)) {
-            df_coord <- pca_cluster$x[, num_components] %>% as_tibble
-            num_prop_variance <- summary(pca_cluster)$importance[2, num_components]
-            output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
-        } else {
-            df_coord <- pca_cluster$x %>% as_tibble
-            num_prop_variance <- summary(pca_cluster)$importance[2, ]
-            output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
-        }
+#         if (ncol(pca_cluster$x) > length(num_components)) {
+#             df_coord <- pca_cluster$x[, num_components] %>% as_tibble
+#             num_prop_variance <- summary(pca_cluster)$importance[2, num_components]
+#             output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
+#         } else {
+#             df_coord <- pca_cluster$x %>% as_tibble
+#             num_prop_variance <- summary(pca_cluster)$importance[2, ]
+#             output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
+#         }
 
-        input_hdbscan <- output_pca
+#         input_hdbscan <- output_pca
 
-        min_cluster_sizes <-
-            seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.5, length = 25) %>%
-            as.integer %>%
-            `+`(2L) %>%
-            unique
+#         min_cluster_sizes <-
+#         seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.3, length = 30) %>%
+#             as.integer %>%
+#             `+`(2L) %>%
+#             unique
 
-        int_cluster_nums <-
-            mclapply(min_cluster_sizes, hd,
-            mc.cores = as.integer(threads)) %>%
-            unlist
+#         int_cluster_nums <-
+#             mclapply(min_cluster_sizes, hd,
+#             mc.cores = as.integer(threads)) %>%
+#             unlist
 
-        getmode <- function(v) {
-            uniqv <- unique(v)
-            uniqv[which.max(tabulate(match(v, uniqv)))]
-        }
+#         getmode <- function(v) {
+#             uniqv <- unique(v)
+#             uniqv[which.max(tabulate(match(v, uniqv)))]
+#         }
 
-        if (getmode(int_cluster_nums) == 1) next
+#         if (getmode(int_cluster_nums) == 1) next
 
-        int_cluster_nums_opt <-
-            int_cluster_nums %>%
-            as_tibble %>%
-            mutate(id = row_number()) %>%
-            add_count(value, name = "count") %>%
-            slice_max(count) %>%
-            slice_min(id) %>%
-            pull(id)
+#         int_cluster_nums_opt <-
+#             int_cluster_nums %>%
+#             as_tibble %>%
+#             mutate(id = row_number()) %>%
+#             add_count(value, name = "count") %>%
+#             slice_max(count) %>%
+#             slice_min(id) %>%
+#             pull(id)
 
-        if (length(int_cluster_nums_opt) == 0)
-            int_cluster_nums_opt <- which.max(min_cluster_sizes)
+#         if (length(int_cluster_nums_opt) == 0)
+#             int_cluster_nums_opt <- which.max(min_cluster_sizes)
 
-        tmp_cl <- clustering_hdbscan$fit_predict(input_hdbscan) + 1
-        if (any(tmp_cl == 0)) tmp_cl <- tmp_cl + 1
-        hdbscan_clusters[hdbscan_clusters == cluster] <- tmp_cl + max(hdbscan_clusters)
-    }
-}
-# table(int_hdbscan_clusters)
-# table(hdbscan_clusters)
-int_hdbscan_clusters <- hdbscan_clusters
+#         tmp_cl <- clustering_hdbscan$fit_predict(input_hdbscan) + 1
+#         if (any(tmp_cl == 0)) tmp_cl <- tmp_cl + 1
+#         hdbscan_clusters[hdbscan_clusters == cluster] <- tmp_cl + max(hdbscan_clusters)
+#     }
+# }
+# # table(int_hdbscan_clusters)
+# # table(hdbscan_clusters)
+# int_hdbscan_clusters <- hdbscan_clusters
 #* ========================================================
 
 ################################################################################
