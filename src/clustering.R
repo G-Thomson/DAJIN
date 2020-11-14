@@ -29,7 +29,7 @@ hdbscan <- reticulate::import("hdbscan")
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode24"
+# barcode <- "barcode08"
 # allele <- "wt"
 
 # if (allele == "abnormal") control_allele <- "wt"
@@ -189,15 +189,11 @@ output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
 ################################################################################
 #! Clustering
 ################################################################################
-# ggplot(output_pca, aes(x = PC1, y = PC2)) + geom_point()
-# output_pca$PC1 %>% plot
-# output_pca$PC1 %>% as_tibble %>% filter(value > 0.1)
-# output_pca$PC1 %>% as_tibble %>% filter(value < 0)
 
 input_hdbscan <- output_pca
 
 min_cluster_sizes <-
-    seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.3, length = 20) %>%
+    seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.3, length = 100) %>%
     as.integer %>%
     `+`(2L) %>%
     unique
