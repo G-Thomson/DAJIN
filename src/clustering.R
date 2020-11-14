@@ -189,10 +189,10 @@ output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
 ################################################################################
 #! Clustering
 ################################################################################
-ggplot(output_pca, aes(x = PC1, y = PC2)) + geom_point()
-output_pca$PC1 %>% plot
-output_pca$PC1 %>% as_tibble %>% filter(value > 0.1)
-output_pca$PC1 %>% as_tibble %>% filter(value < 0)
+# ggplot(output_pca, aes(x = PC1, y = PC2)) + geom_point()
+# output_pca$PC1 %>% plot
+# output_pca$PC1 %>% as_tibble %>% filter(value > 0.1)
+# output_pca$PC1 %>% as_tibble %>% filter(value < 0)
 
 input_hdbscan <- output_pca
 
@@ -316,8 +316,8 @@ while (!identical(unique(hdbscan_clusters), stop_cl_number)) {
         hdbscan_clusters[hdbscan_clusters == cluster] <- tmp_cl + max(hdbscan_clusters)
     }
 }
-table(int_hdbscan_clusters)
-table(hdbscan_clusters)
+# table(int_hdbscan_clusters)
+# table(hdbscan_clusters)
 
 int_hdbscan_clusters <- hdbscan_clusters
 #* ========================================================
