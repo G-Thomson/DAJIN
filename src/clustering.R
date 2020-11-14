@@ -29,7 +29,7 @@ hdbscan <- reticulate::import("hdbscan")
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode08"
+# barcode <- "barcode23"
 # allele <- "wt"
 
 # if (allele == "abnormal") control_allele <- "wt"
@@ -302,7 +302,7 @@ while (!identical(unique(hdbscan_clusters), stop_cl_number)) {
         clustering_hdbscan <-
             hdbscan$HDBSCAN(
                 min_samples = 1L,
-                min_cluster_size = as.integer(nrow(input_hdbscan) * 0.3),
+                min_cluster_size = as.integer(nrow(input_hdbscan) * 0.4),
                 memory = joblib$Memory(cachedir = ".DAJIN_temp/clustering/temp", verbose = 0)
             )
 
