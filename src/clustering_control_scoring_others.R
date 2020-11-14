@@ -4,7 +4,7 @@
 
 options(repos = "https://cloud.r-project.org/")
 options(readr.show_progress = FALSE)
-if (!requireNamespace("pacman", quietly = T)) install.packages("pacman")
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse)
 
 ################################################################################
@@ -23,7 +23,7 @@ threads <- as.integer(args[2])
 #? Inputs
 #===========================================================
 
-df_wt <- readRDS(".DAJIN_temp/clustering/temp/df_control_freq_wt.RDS")
+df_wt <- readRDS(".DAJIN_temp/clustering/temp/df_control_prop_wt.RDS")
 
 df_label <- read_csv(
     file_name,
@@ -67,17 +67,18 @@ if (logic_point_mutation) {
         filter(mut == 1) %>%
         pull(loc)
 
-    df_control_freq_label <- df_label
+    df_control_prop_label <- df_label
 
-    for(num_label_loc in df_label$loc){
+    for (num_label_loc in df_label$loc) {
         if (num_label_loc != mut_loc) {
-            df_control_freq_label$mut[num_label_loc] <- df_wt$control_freq[num_label_loc]
+            df_control_prop_label$mut[num_label_loc] <-
+                df_wt$control_prop[num_label_loc]
         }
     }
 
-    df_control_freq_label <-
-        df_control_freq_label %>%
-        rename(control_freq = mut) %>%
+    df_control_prop_label <-
+        df_control_prop_label %>%
+        rename(control_prop = mut) %>%
         mutate(mut = df_label$mut)
 }
 
@@ -94,7 +95,7 @@ if (logic_inversion) {
 
     df_label$loc[df_label$mut == 2] <- invert_loc
 
-    df_control_freq_label <-
+    df_control_prop_label <-
         df_wt %>%
         mutate(loc = df_label$loc, mut = df_label$mut) %>%
         arrange(loc)
@@ -105,18 +106,19 @@ if (logic_inversion) {
 #===========================================================
 
 if (logic_insertion) {
-    df_control_freq_label <- df_label
+    df_control_prop_label <- df_label
 
     num_ref_loc <- 1
-    for(num_label_loc in df_label$loc){
+    for (num_label_loc in df_label$loc) {
         if (df_label$mut[num_label_loc] == 0) {
-            df_control_freq_label$mut[num_label_loc] <- df_wt$control_freq[num_ref_loc]
+            df_control_prop_label$mut[num_label_loc] <-
+                df_wt$control_prop[num_ref_loc]
             num_ref_loc <- num_ref_loc + 1
         }
     }
-    df_control_freq_label <-
-        df_control_freq_label %>%
-        rename(control_freq = mut) %>%
+    df_control_prop_label <-
+        df_control_prop_label %>%
+        rename(control_prop = mut) %>%
         mutate(mut = df_label$mut)
 }
 
@@ -125,7 +127,7 @@ if (logic_insertion) {
 #===========================================================
 
 if (logic_deletion) {
-    df_control_freq_label <-
+    df_control_prop_label <-
         df_wt[df_label$mut == 0, ] %>%
         mutate(loc = row_number(), mut = 0)
 }
@@ -134,5 +136,5 @@ if (logic_deletion) {
 #! Save results
 ################################################################################
 
-saveRDS(df_control_freq_label,
-    sprintf(".DAJIN_temp/clustering/temp/df_control_freq_%s.RDS", output_label))
+saveRDS(df_control_prop_label,
+    sprintf(".DAJIN_temp/clustering/temp/df_control_prop_%s.RDS", output_label))

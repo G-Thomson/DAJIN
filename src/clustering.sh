@@ -31,7 +31,7 @@ mapping_alleletype="${alleletype}"
 [ "$alleletype" = "normal" ] && mapping_alleletype="wt"
 [ "$alleletype" = "abnormal" ] && mapping_alleletype="wt"
 
-control_RDS=".DAJIN_temp/clustering/temp/df_control_freq_${mapping_alleletype}.RDS"
+control_RDS=".DAJIN_temp/clustering/temp/df_control_prop_${mapping_alleletype}.RDS"
 
 #===========================================================
 #? Output
