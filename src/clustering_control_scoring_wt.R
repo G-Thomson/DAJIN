@@ -4,8 +4,8 @@
 
 options(repos = "https://cloud.r-project.org/")
 options(readr.show_progress = FALSE)
-if (!requireNamespace("pacman", quietly = T)) install.packages("pacman")
-pacman::p_load(tidyverse, parallel, vroom)
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(tidyverse, parallel, vroom, tidyfast)
 
 ################################################################################
 #! I/O naming
@@ -33,19 +33,19 @@ colnames(df_control_mids) <- seq_len(ncol(df_control_mids))
 #! MIDS scoring
 ################################################################################
 
-df_control_freq_wt <-
+df_control_prop_wt <-
     df_control_mids %>%
-    pivot_longer(col = everything(), names_to = "loc", values_to = "MIDS") %>%
+    dt_pivot_longer(names_to = "loc", values_to = "MIDS") %>%
     nest(nest = c(MIDS)) %>%
-    mutate(control_freq = mclapply(nest,
+    mutate(control_prop = mclapply(nest,
         function(x)
-            x %>% count(MIDS) %>% mutate(freq = n / sum(n) * 100),
+            x %>% table(dnn = "MIDS") %>% prop.table() %>% as_tibble(n = "prop"),
         mc.cores = threads)) %>%
     mutate(loc = as.double(loc), mut = 0) %>%
-    select(loc, control_freq, mut)
+    select(loc, control_prop, mut)
 
 ################################################################################
 #! Save results
 ################################################################################
 
-saveRDS(df_control_freq_wt, ".DAJIN_temp/clustering/temp/df_control_freq_wt.RDS")
+saveRDS(df_control_prop_wt, ".DAJIN_temp/clustering/temp/df_control_prop_wt.RDS")
