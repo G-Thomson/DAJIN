@@ -219,77 +219,77 @@ xargs mkdir -p
 
 ./DAJIN/src/format_fasta.sh "$design" "$input_dir" "$grna"
 
-################################################################################
-#! NanoSim (v2.5.0)
-################################################################################
+# ################################################################################
+# #! NanoSim (v2.5.0)
+# ################################################################################
 
-cat << EOF >&2
---------------------------------------------------------------------------------
-NanoSim read simulation
---------------------------------------------------------------------------------
-EOF
+# cat << EOF >&2
+# --------------------------------------------------------------------------------
+# NanoSim read simulation
+# --------------------------------------------------------------------------------
+# EOF
 
-set +u
-conda activate DAJIN_nanosim
-set -u
+# set +u
+# conda activate DAJIN_nanosim
+# set -u
 
-if [ "$(find .DAJIN_temp/fasta_ont | grep -c simulated)" -eq 0 ]; then
-    ./DAJIN/src/nanosim.sh "${control}" "${threads}"
-fi
+# if [ "$(find .DAJIN_temp/fasta_ont | grep -c simulated)" -eq 0 ]; then
+#     ./DAJIN/src/nanosim.sh "${control}" "${threads}"
+# fi
 
-################################################################################
-#! MIDS conversion
-################################################################################
+# ################################################################################
+# #! MIDS conversion
+# ################################################################################
 
-cat << EOF >&2
---------------------------------------------------------------------------------
-Preprocessing
---------------------------------------------------------------------------------
-EOF
+# cat << EOF >&2
+# --------------------------------------------------------------------------------
+# Preprocessing
+# --------------------------------------------------------------------------------
+# EOF
 
-set +u
-conda activate DAJIN
-set -u
+# set +u
+# conda activate DAJIN
+# set -u
+
+# # #===========================================================
+# # #? Get mutation loci
+# # #===========================================================
+
+# minimap2 -ax splice \
+#     ".DAJIN_temp/fasta_conv/wt.fa" ".DAJIN_temp/fasta_conv/target.fa" \
+#     --cs 2>/dev/null |
+#     awk '{for(i=1; i<=NF;i++) if($i ~ /cs:Z/) print $i}' |
+#     sed -e "s/cs:Z:://g" -e "s/:/ /g" -e "s/~/ /g" |
+#     tr -d "\~\*\-\+atgc" |
+#     awk '{$NF=0; for(i=1;i<=NF;i++) sum+=$i} END{print $1,sum}' |
+# cat > .DAJIN_temp/data/mutation_points
 
 # #===========================================================
-# #? Get mutation loci
+# #? MIDS conversion
 # #===========================================================
 
-minimap2 -ax splice \
-    ".DAJIN_temp/fasta_conv/wt.fa" ".DAJIN_temp/fasta_conv/target.fa" \
-    --cs 2>/dev/null |
-    awk '{for(i=1; i<=NF;i++) if($i ~ /cs:Z/) print $i}' |
-    sed -e "s/cs:Z:://g" -e "s/:/ /g" -e "s/~/ /g" |
-    tr -d "\~\*\-\+atgc" |
-    awk '{$NF=0; for(i=1;i<=NF;i++) sum+=$i} END{print $1,sum}' |
-cat > .DAJIN_temp/data/mutation_points
+# find .DAJIN_temp/fasta_ont -type f |
+#     sort |
+#     awk '{print "./DAJIN/src/mids_classification.sh", $0, "wt", "&"}' |
+#     awk -v th=${threads:-1} '{
+#         if (NR%th==0) gsub("&","&\nwait",$0)
+#         print}
+#         END{print "wait"}' |
+# sh - 2>/dev/null
 
-#===========================================================
-#? MIDS conversion
-#===========================================================
+# ################################################################################
+# #! Prediction
+# ################################################################################
 
-find .DAJIN_temp/fasta_ont -type f |
-    sort |
-    awk '{print "./DAJIN/src/mids_classification.sh", $0, "wt", "&"}' |
-    awk -v th=${threads:-1} '{
-        if (NR%th==0) gsub("&","&\nwait",$0)
-        print}
-        END{print "wait"}' |
-sh - 2>/dev/null
+# cat << EOF >&2
+# --------------------------------------------------------------------------------
+# Predict allele types
+# --------------------------------------------------------------------------------
+# EOF
 
-################################################################################
-#! Prediction
-################################################################################
-
-cat << EOF >&2
---------------------------------------------------------------------------------
-Predict allele types
---------------------------------------------------------------------------------
-EOF
-
-./DAJIN/src/ml_prediction.sh "${control}" "${threads}" \
-> .DAJIN_temp/data/DAJIN_MIDS_prediction_result.txt ||
-exit 1
+# ./DAJIN/src/ml_prediction.sh "${control}" "${threads}" \
+# > .DAJIN_temp/data/DAJIN_MIDS_prediction_result.txt ||
+# exit 1
 
 
 ################################################################################
