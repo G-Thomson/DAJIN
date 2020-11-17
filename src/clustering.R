@@ -29,7 +29,7 @@ hdbscan <- reticulate::import("hdbscan")
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode38"
+# barcode <- "barcode32"
 # allele <- "abnormal"
 
 # if (allele == "abnormal") control_allele <- "wt"
@@ -166,11 +166,11 @@ pca_hotelling <-
     pull(loc)
 
 # Force to add a point mutation location
-if (sum(df_control_score$mut) == 1) {
-    pca_hotelling <-
-        append(pca_hotelling, which(df_control_score$mut == 1)) %>%
-        unique
-}
+
+pca_hotelling <-
+    pca_hotelling %>%
+    `if`(sum(df_control_score$mut) == 1,
+    append(., which(df_control_score$mut == 1)) %>% unique, .)
 
 #* TEST ========================================================
 
