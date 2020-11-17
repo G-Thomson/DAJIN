@@ -29,8 +29,8 @@ hdbscan <- reticulate::import("hdbscan")
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode23"
-# allele <- "wt"
+# barcode <- "barcode38"
+# allele <- "abnormal"
 
 # if (allele == "abnormal") control_allele <- "wt"
 # if (allele != "abnormal") control_allele <- allele
@@ -71,6 +71,7 @@ df_control_score <- readRDS(file_control_score)
 #? Outputs
 #===========================================================
 
+cachedir <- ".DAJIN_temp/clustering/temp"
 output_suffix <- str_remove(file_que_label, ".*labels_")
 
 ################################################################################
@@ -174,17 +175,18 @@ if (sum(df_control_score$mut) == 1) {
 #* TEST ========================================================
 
 pca_second <- prcomp(df_score[, pca_hotelling], scale = FALSE)
+
 num_components <- 10
 
-if (ncol(pca_second$x) > num_components) {
-    df_coord <- pca_second$x[, 1:num_components] %>% as_tibble
-    num_prop_variance <- summary(pca_second)$importance[2, 1:num_components]
-} else {
-    df_coord <- pca_second$x %>% as_tibble
-    num_prop_variance <- summary(pca_second)$importance[2, ]
-}
+tmp_components <-
+    `if`(length(pca_hotelling) > num_components,
+        seq_len(num_components),
+        seq_along(pca_hotelling))
 
-output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
+df_coord <- pca_second$x[, tmp_components] %>% as_tibble
+prop_variance <- summary(pca_second)$importance[2, tmp_components]
+
+output_pca <- map2_dfc(df_coord, prop_variance, ~ .x * .y)
 
 ################################################################################
 #! Clustering
@@ -199,9 +201,9 @@ min_cluster_sizes <-
     unique
 
 hd <- function(x) {
-    cl <- hdbscan$HDBSCAN(min_samples = 1L, min_cluster_size = x,
-        memory = joblib$Memory(cachedir = ".DAJIN_temp/clustering/temp", verbose = 0))
-    cl$fit_predict(input_hdbscan) %>% table %>% length
+    cl <- hdbscan$HDBSCAN(min_samples = 1L, min_cluster_size = as.integer(x),
+        memory = joblib$Memory(cachedir = cachedir, verbose = 0))
+    cl$fit_predict(input_hdbscan) %>% unique %>% length
 }
 
 #===========================================================
@@ -239,7 +241,7 @@ clustering_hdbscan <-
     hdbscan$HDBSCAN(
         min_samples = 1L,
         min_cluster_size = min_cluster_sizes[int_cluster_nums_opt],
-        memory = joblib$Memory(cachedir = ".DAJIN_temp/clustering/temp", verbose = 0)
+        memory = joblib$Memory(cachedir = cachedir, verbose = 0)
     )
 
 int_hdbscan_clusters <- clustering_hdbscan$fit_predict(input_hdbscan) + 1
@@ -254,62 +256,26 @@ stop_cl_number <- NA
 while (!identical(unique(hdbscan_clusters), stop_cl_number)) {
     for (cluster in unique(hdbscan_clusters) %>%  sort) {
         stop_cl_number <- unique(hdbscan_clusters)
-        if(df_score[hdbscan_clusters == cluster, pca_hotelling] %>% n_distinct == 1) next
+        tmp_df_score <- df_score[hdbscan_clusters == cluster, pca_hotelling]
+        if (tmp_df_score %>% n_distinct == 1) next
 
-        pca_cluster <- prcomp(df_score[hdbscan_clusters == cluster, pca_hotelling], scale = FALSE)
-
-        if (ncol(pca_cluster$x) > num_components) {
-            df_coord <- pca_cluster$x[, 1:num_components] %>% as_tibble
-            num_prop_variance <- summary(pca_cluster)$importance[2, 1:num_components]
-        } else {
-            df_coord <- pca_cluster$x %>% as_tibble
-            num_prop_variance <- summary(pca_cluster)$importance[2, ]
-        }
-
-        output_pca <- map2_dfc(df_coord, num_prop_variance, ~ .x * .y)
-        input_hdbscan <- output_pca
-
-        # min_cluster_sizes <-
-        # seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.3, length = 20) %>%
-        #     as.integer %>%
-        #     `+`(2L) %>%
-        #     unique
-
-        # int_cluster_nums <-
-        #     mclapply(min_cluster_sizes, hd,
-        #     mc.cores = as.integer(threads)) %>%
-        #     unlist
-
-        # getmode <- function(v) {
-        #     uniqv <- unique(v)
-        #     uniqv[which.max(tabulate(match(v, uniqv)))]
-        # }
-
-        # if (getmode(int_cluster_nums) == 1) next
-
-        # int_cluster_nums_opt <-
-        #     int_cluster_nums %>%
-        #     as_tibble %>%
-        #     mutate(id = row_number()) %>%
-        #     add_count(value, name = "count") %>%
-        #     slice_max(count) %>%
-        #     slice_min(id) %>%
-        #     pull(id)
-
-        # if (length(int_cluster_nums_opt) == 0)
-        #     int_cluster_nums_opt <- which.max(min_cluster_sizes)
+        pca_cluster <- prcomp(tmp_df_score, scale = FALSE)
+        df_coord <- pca_second$x[, tmp_components] %>% as_tibble
+        prop_variance <- summary(pca_second)$importance[2, tmp_components]
+        input_hdbscan <- map2_dfc(df_coord, prop_variance, ~ .x * .y)
 
         clustering_hdbscan <-
             hdbscan$HDBSCAN(
                 min_samples = 1L,
-                min_cluster_size = as.integer(nrow(input_hdbscan) * 0.4),
-                memory = joblib$Memory(cachedir = ".DAJIN_temp/clustering/temp", verbose = 0)
+                min_cluster_size = as.integer(nrow(input_hdbscan * 0.4)),
+                memory = joblib$Memory(cachedir = cachedir, verbose = 0)
             )
 
         tmp_cl <- clustering_hdbscan$fit_predict(input_hdbscan) + 1
         if (length(unique(tmp_cl)) == 1) next
         if (any(tmp_cl == 0)) tmp_cl <- tmp_cl + 1
         hdbscan_clusters[hdbscan_clusters == cluster] <- tmp_cl + max(hdbscan_clusters)
+
     }
 }
 # table(int_hdbscan_clusters)
