@@ -195,7 +195,7 @@ output_pca <- map2_dfc(df_coord, prop_variance, ~ .x * .y)
 input_hdbscan <- output_pca
 
 min_cluster_sizes <-
-    seq(nrow(input_hdbscan) * 0.1, nrow(input_hdbscan) * 0.3, length = 100) %>%
+    seq(nrow(input_hdbscan) * 0.2, nrow(input_hdbscan) * 0.4, length.out = 50) %>%
     as.integer %>%
     `+`(2L) %>%
     unique
