@@ -18,7 +18,7 @@ pacman::p_load(tidyverse, furrr, vroom)
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode28"
+# barcode <- "barcode14"
 # allele <- "wt"
 
 # if (allele == "abnormal") control_allele <- "wt"
@@ -30,7 +30,7 @@ pacman::p_load(tidyverse, furrr, vroom)
 # plan(multiprocess, workers = threads)
 
 #===========================================================
-#? Auguments
+# ? Auguments
 #===========================================================
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -73,82 +73,82 @@ df_score <- readRDS(sprintf(".DAJIN_temp/clustering/temp/df_score_%s.RDS", outpu
 
 merged_clusters <- int_hdbscan_clusters
 
-#===========================================================
-#? Extract mutations
-#===========================================================
+# #===========================================================
+# #? Extract mutations
+# #===========================================================
 
-hotelling <-
-    future_map_dfr(unique(merged_clusters), function(x) {
+# hotelling <-
+#     future_map_dfr(unique(merged_clusters), function(x) {
 
-        add_rnorm <-
-            df_score[merged_clusters == x, ] %>%
-            colSums() %>%
-            scale() %>%
-            .[c(1:100, tail(seq(ncol(df_score)), 100))] %>%
-            { rnorm(ncol(df_que_mids) * 100, mean = mean(.), sd = sd(.)) }%>%
-            as_tibble() %>%
-            rename(score = value)
+#         add_rnorm <-
+#             df_score[merged_clusters == x, ] %>%
+#             colSums() %>%
+#             scale() %>%
+#             .[c(1:100, tail(seq(ncol(df_score)), 100))] %>%
+#             { rnorm(ncol(df_que_mids) * 100, mean = mean(.), sd = sd(.)) } %>%
+#             as_tibble() %>%
+#             rename(score = value)
 
-        df_score[merged_clusters == x, ] %>%
-            colSums() %>%
-            scale() %>%
-            as_tibble %>%
-            rename(score = colnames(.)) %>%
-            bind_rows(add_rnorm) %>%
-            summarize(score = score,
-                mean = mean(score),
-                var = mean((score - mean(score))^2)) %>%
-            summarize(anomaly_score = (score - mean)^2 / var) %>%
-            mutate(loc = row_number(), threshold = qchisq(0.99, 1)) %>%
-            filter(anomaly_score > threshold & loc <= ncol(df_que_mids)) %>%
-            select(loc) %>%
-            mutate(cl = x)
-    })
+#         df_score[merged_clusters == x, ] %>%
+#             colSums() %>%
+#             scale() %>%
+#             as_tibble %>%
+#             rename(score = colnames(.)) %>%
+#             bind_rows(add_rnorm) %>%
+#             summarize(score = score,
+#                 mean = mean(score),
+#                 var = mean((score - mean(score))^2)) %>%
+#             summarize(anomaly_score = (score - mean)^2 / var) %>%
+#             mutate(loc = row_number(), threshold = qchisq(0.99, 1)) %>%
+#             filter(anomaly_score > threshold & loc <= ncol(df_que_mids)) %>%
+#             select(loc) %>%
+#             mutate(cl = x)
+#     })
 
-#===========================================================
-#? Exclude fuzzy mutations
-#===========================================================
+# #===========================================================
+# #? Exclude fuzzy mutations
+# #===========================================================
 
-tmp_possible_true_mut <- hotelling$loc %>% sort %>% unique
+# tmp_possible_true_mut <- hotelling$loc %>% sort %>% unique
 
-lgl_possible_true_mut <-
-    future_map_lgl(tmp_possible_true_mut, function(loc) {
-            map_lgl(unique(merged_clusters), function(cl) {
-                df_que_mids[merged_clusters == cl, loc] %>%
-                    table(dnn = "MIDS") %>%
-                    prop.table() %>%
-                    as_tibble() %>%
-                    mutate(lgl = if_else((MIDS != "M" & n > 0.75) | (MIDS == "M" & n < 0.1), TRUE, FALSE)) %>%
-                    summarize(lgl = if_else(sum(lgl) > 0, TRUE, FALSE)) %>%
-                    pull(lgl)
-            }) %>%
-            any
-    })
+# lgl_possible_true_mut <-
+#     future_map_lgl(tmp_possible_true_mut, function(loc) {
+#             map_lgl(unique(merged_clusters), function(cl) {
+#                 df_que_mids[merged_clusters == cl, loc] %>%
+#                     table(dnn = "MIDS") %>%
+#                     prop.table() %>%
+#                     as_tibble() %>%
+#                     mutate(lgl = if_else((MIDS != "M" & n > 0.75) | (MIDS == "M" & n < 0.1), TRUE, FALSE)) %>%
+#                     summarize(lgl = if_else(sum(lgl) > 0, TRUE, FALSE)) %>%
+#                     pull(lgl)
+#             }) %>%
+#             any
+#     })
 
-possible_true_mut <-
-    tmp_possible_true_mut[lgl_possible_true_mut]
+# possible_true_mut <-
+#     tmp_possible_true_mut[lgl_possible_true_mut]
 
-# Force to add a point mutation location
-if (sum(df_control_score$mut) == 1) {
-    possible_true_mut <-
-        append(possible_true_mut, which(df_control_score$mut == 1)) %>%
-        unique
-}
+# # Force to add a point mutation location
+# if (sum(df_control_score$mut) == 1) {
+#     possible_true_mut <-
+#         append(possible_true_mut, which(df_control_score$mut == 1)) %>%
+#         unique
+# }
 
-#===========================================================
-#? Divide mutation into common and uncommon
-#===========================================================
+# #===========================================================
+# #? Divide mutation into common and uncommon
+# #===========================================================
 
-hotelling_common <-
-    hotelling %>%
-    filter(loc %in% possible_true_mut) %>%
-    add_count(loc, name = "count_loc") %>%
-    mutate(common = if_else(
-        count_loc == length(unique(merged_clusters)),
-        TRUE,
-        FALSE)) %>%
-    select(loc, common) %>%
-    distinct()
+# hotelling_common <-
+#     hotelling %>%
+#     filter(loc %in% possible_true_mut) %>%
+#     add_count(loc, name = "count_loc") %>%
+#     mutate(common = if_else(
+#         count_loc == length(unique(merged_clusters)),
+#         TRUE,
+#         FALSE)) %>%
+#     select(loc, common) %>%
+#     distinct()
 
 ################################################################################
 #! Merge clusters
