@@ -9,7 +9,7 @@ options(future.globals.maxSize = Inf)
 options(warn = -1)
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(tidyverse, parallel, furrr, vroom, tidyfast, clusternor)
+pacman::p_load(tidyverse, parallel, furrr, vroom, tidyfast)
 
 #* Setting reticulate
 if (!requireNamespace("reticulate", quietly = TRUE)) install.packages("reticulate")
@@ -29,7 +29,7 @@ hdbscan <- reticulate::import("hdbscan")
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode24"
+# barcode <- "barcode12"
 # allele <- "wt"
 
 # if (allele == "abnormal") control_allele <- "wt"
