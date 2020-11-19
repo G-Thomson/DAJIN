@@ -11,15 +11,15 @@ options(warn = -1)
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse, parallel, furrr, vroom, tidyfast, clusternor)
 
-# #* Setting reticulate
-# if (!requireNamespace("reticulate", quietly = TRUE)) install.packages("reticulate")
-# DAJIN_PYTHON <- reticulate:::conda_list()$python %>%
-#     str_subset("DAJIN/bin/python")
-# Sys.setenv(RETICULATE_PYTHON = DAJIN_PYTHON)
-# reticulate::use_condaenv("DAJIN")
+#* Setting reticulate
+if (!requireNamespace("reticulate", quietly = TRUE)) install.packages("reticulate")
+DAJIN_PYTHON <- reticulate::conda_list()$python %>%
+    str_subset("DAJIN/bin/python")
+Sys.setenv(RETICULATE_PYTHON = DAJIN_PYTHON)
+reticulate::use_condaenv("DAJIN")
 
-# joblib <- reticulate::import("joblib")
-# hdbscan <- reticulate::import("hdbscan")
+joblib <- reticulate::import("joblib")
+hdbscan <- reticulate::import("hdbscan")
 
 ################################################################################
 #! I/O naming
@@ -29,7 +29,7 @@ pacman::p_load(tidyverse, parallel, furrr, vroom, tidyfast, clusternor)
 #? TEST Auguments
 #===========================================================
 
-# barcode <- "barcode21"
+# barcode <- "barcode24"
 # allele <- "wt"
 
 # if (allele == "abnormal") control_allele <- "wt"
@@ -187,10 +187,97 @@ prop_variance <- summary(pca_second)$importance[2, tmp_components]
 output_pca <- map2_dfc(df_coord, prop_variance, ~ .x * .y)
 
 ################################################################################
-#! x-means clustering
+#! HDBSCAN clustering
 ################################################################################
 
-xmeans <- Xmeans(as.matrix(output_pca), kmax = 2, iter.max = 100, nthread = threads)
+input_hdbscan <- output_pca
+
+min_cluster_sizes <-
+    seq(nrow(input_hdbscan) * 0.2, nrow(input_hdbscan) * 0.4, length.out = 50) %>%
+    as.integer %>%
+    `+`(2L) %>%
+    unique
+
+hd <- function(x) {
+    cl <- hdbscan$HDBSCAN(min_samples = 1L, min_cluster_size = as.integer(x),
+        memory = joblib$Memory(cachedir = cachedir, verbose = 0))
+    cl$fit_predict(input_hdbscan) %>% unique %>% length
+}
+
+#===========================================================
+#? Clustering with multile cluster sizes
+#? to find the most frequent cluster numbers
+#===========================================================
+
+int_cluster_nums <-
+    mclapply(min_cluster_sizes, hd,
+    mc.cores = as.integer(threads)) %>%
+    unlist
+
+#===========================================================
+#? Extract cluster size with the smallest cluster size
+#? and the most frequent cluster numbers
+#===========================================================
+
+int_cluster_nums_opt <-
+    int_cluster_nums %>%
+    as_tibble %>%
+    mutate(id = row_number()) %>%
+    add_count(value, name = "count") %>%
+    slice_max(count) %>%
+    slice_min(id) %>%
+    pull(id)
+
+if (length(int_cluster_nums_opt) == 0)
+    int_cluster_nums_opt <- which.max(min_cluster_sizes)
+
+#===========================================================
+#? Clustering with optimized cluster sizes
+#===========================================================
+
+clustering_hdbscan <-
+    hdbscan$HDBSCAN(
+        min_samples = 1L,
+        min_cluster_size = min_cluster_sizes[int_cluster_nums_opt],
+        memory = joblib$Memory(cachedir = cachedir, verbose = 0)
+    )
+
+int_hdbscan_clusters <- clustering_hdbscan$fit_predict(input_hdbscan) + 1
+
+
+#===========================================================
+#? Repeat clustering
+#===========================================================
+
+hdbscan_clusters <- int_hdbscan_clusters
+stop_cl_number <- NA
+
+while (!identical(unique(hdbscan_clusters), stop_cl_number)) {
+    for (cluster in unique(hdbscan_clusters) %>%  sort) {
+        stop_cl_number <- unique(hdbscan_clusters)
+        tmp_df_score <- df_score[hdbscan_clusters == cluster, pca_hotelling]
+        if (tmp_df_score %>% n_distinct == 1) next
+
+        pca_cluster <- prcomp(tmp_df_score, scale = FALSE)
+        df_coord <- pca_cluster$x[, tmp_components] %>% as_tibble
+        prop_variance <- summary(pca_cluster)$importance[2, tmp_components]
+        input_hdbscan <- map2_dfc(df_coord, prop_variance, ~ .x * .y)
+
+        clustering_hdbscan <-
+            hdbscan$HDBSCAN(
+                min_samples = 1L,
+                min_cluster_size = as.integer(nrow(input_hdbscan) * 0.4),
+                memory = joblib$Memory(cachedir = cachedir, verbose = 0)
+            )
+
+        tmp_cl <- clustering_hdbscan$fit_predict(input_hdbscan) + 1
+        if (length(unique(tmp_cl)) == 1) next
+        if (any(tmp_cl == 0)) tmp_cl <- tmp_cl + 1
+        hdbscan_clusters[hdbscan_clusters == cluster] <- tmp_cl + max(hdbscan_clusters)
+
+    }
+}
+
 
 ################################################################################
 #! Merge clusters
@@ -200,7 +287,7 @@ xmeans <- Xmeans(as.matrix(output_pca), kmax = 2, iter.max = 100, nthread = thre
 #? Merge clusters with the same mutation profiles
 #===========================================================
 
-merged_clusters <- xmeans$cluster
+merged_clusters <- hdbscan_clusters
 possible_true_mut <- pca_hotelling
 
 if (length(unique(merged_clusters)) > 1 && length(possible_true_mut) > 0) {
@@ -306,10 +393,6 @@ merged_clusters <- as.factor(merged_clusters) %>% as.integer()
 
 df_readid_cluster <-
     tibble(read_id = df_que_label$id, cluster = merged_clusters)
-
-# table(hdbscan_first)
-# table(xmeans$cluster)
-# table(merged_clusters)
 
 write_tsv(df_readid_cluster,
     sprintf(".DAJIN_temp/clustering/temp/hdbscan_%s", output_suffix),
