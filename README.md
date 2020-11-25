@@ -5,7 +5,7 @@
 
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-[日本語はこちら](https://github.com/akikuno/DAJIN/blob/master/misc/README_JP.md)
+[日本語はこちら](https://github.com/akikuno/DAJIN/blob/master/docs/README_JP.md)
 
 A simple, rapid, scalable whole-allelic profiling of genome editing organisms using long-read sequencer
 

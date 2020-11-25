@@ -65,11 +65,11 @@ do
     case "$1" in
         --help | --hel | --he | --h | '--?' | -help | -hel | -he | -h | '-?')
             usage_and_exit
-            ;;
+        ;;
         --version | --versio | --versi | --vers | --ver | --ve | --v | \
         -version | -versio | -versi | -vers | -ver | -ve | -v )
             echo "DAJIN version: $VERSION" && exit 0
-            ;;
+        ;;
         --input | --in | --i | -i )
             if ! [ -r "$2" ]; then
                 error_exit "$2: No such file"
@@ -83,13 +83,13 @@ do
             threads=$(cat "$2" | grep "^threads" | sed -e "s/ //g" -e "s/.*=//g")
             filter=$(cat "$2" | grep "^filter" | sed -e "s/ //g" -e "s/.*=//g")
             TEST=$(cat "$2" | grep "^TEST" | sed -e "s/ //g" -e "s/.*=//g")
-            ;;
+        ;;
         -* )
-        error_exit "Unrecognized option : $1"
-            ;;
+            error_exit "Unrecognized option : $1"
+        ;;
         *)
             break
-            ;;
+        ;;
     esac
     shift
 done
@@ -127,11 +127,8 @@ fastq_num=$(find ${input_dir}/* -type f | grep -c -e ".fq" -e ".fastq")
 #? Check control
 #===========================================================
 
-if find ${input_dir}/ -type f | grep -q "${control}"; then
-    :
-else
+find "${input_dir}/" -type f | grep -q "${control}" ||
     error_exit "$control: No control file in ${input_dir}"
-fi
 
 #===========================================================
 #? Check genome
@@ -217,7 +214,8 @@ echo "${dirs}" |
     sed "s: : .DAJIN_temp/:g" |
 xargs mkdir -p
 
-./DAJIN/src/format_fasta.sh "$design" "$input_dir" "$grna"
+./DAJIN/src/format_fasta.sh "$design" "$grna"
+./DAJIN/src/format_fastq.sh "$input_dir" "$threads"
 
 # ################################################################################
 # #! NanoSim (v2.5.0)

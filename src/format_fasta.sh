@@ -20,8 +20,7 @@ export UNIX_STD=2003  # to make HP-UX conform to POSIX
 #===========================================================
 
 design=${1}
-input_dir=${2}
-grna=${3}
+grna=${2}
 
 ################################################################################
 #! Format FASTA file
@@ -138,26 +137,5 @@ if [ "_${target_mutation_type}" = "_S" ]; then
         sed "s/>wt/>wt_del/g" |
     cat > .DAJIN_temp/fasta_conv/wt_del.fa
 fi
-
-################################################################################
-#! Format ONT reads into FASTA file
-################################################################################
-
-find ${input_dir}/* -type f |
-awk -F "/" 'NF==2' |
-grep -e ".fq" -e ".fastq" |
-while read -r input; do
-    output=$(echo ${input%.f*}.fa | sed "s;${input_dir};.DAJIN_temp/fasta_ont;")
-    # Check wheather the files are binary:
-    if [ "$(file ${input} | grep -c compressed)" -eq 1 ]
-    then
-        gzip -dc "${input}"
-    else
-        cat "${input}"
-    fi |
-    awk '{if((4+NR)%4==1 || (4+NR)%4==2) print $0}' |
-    sed "s/^@/>/" |
-    cat > "${output}"
-done
 
 exit 0

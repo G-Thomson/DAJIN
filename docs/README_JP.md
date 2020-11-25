@@ -10,7 +10,7 @@
 ### 動作環境
 
 LinuxまたはWindows 10 ([WSL](https://docs.microsoft.com/ja-jp/windows/wsl/install-win10))で動作確認をしています.  
-検証済みの環境は[こちら](https://github.com/akikuno/DAJIN/blob/master/misc/TESTED_SYSTEMS.md)です.  
+検証済みの環境は[こちら](https://github.com/akikuno/DAJIN/blob/master/docs/TESTED_SYSTEMS.md)です.  
 
 ### `conda`をインストールします
 
