@@ -66,9 +66,9 @@ convert_revcomp=$(
     )
 
 if [ "$convert_revcomp" -eq 1 ] ; then
-    cat "${design_LF}" |
-        ./DAJIN/src/revcomp.sh - |
-    cat > .DAJIN_temp/fasta/fasta_revcomp.fa
+    . DAJIN/bin/revcomp.sh
+
+    revcomp "${design_LF}" > .DAJIN_temp/fasta/fasta_revcomp.fa
     design_LF=".DAJIN_temp/fasta/fasta_revcomp.fa"
 fi
 
