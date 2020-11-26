@@ -28,10 +28,8 @@ grna=${2}
 
 cat "${design}" |
     tr -d "\r" |
-    awk '{if($1~"^>"){print "\n"$0}
-        else {printf $0}}
-        END {print ""}' |
-    grep -v "^$" |
+    awk '$1 ~ /^>/ {print "\n" $0; next} {printf $0}' |
+    awk 'NF != 0 {print}' |
 cat > .DAJIN_temp/fasta/fasta.fa
 
 design_LF=".DAJIN_temp/fasta/fasta.fa"
@@ -75,7 +73,7 @@ fi
 #? Separate multiple-FASTA into FASTA files
 #===========================================================
 
-cat ${design_LF} |
+cat "${design_LF}" |
     awk 'NR%2==1 {printf $1" "; next}1' |
     awk '{id=$1
         gsub(">","",id)
