@@ -1,23 +1,25 @@
+#!/bin/sh
+
 Describe 'revcomp.sh'
   Include bin/revcomp.sh
-  It 'makes DNA reverse: A->T'
-    When call revcomp "AAAA"
-    The output should equal 'TTTT'
+  It 'makes DNA reverse order'
+    When call reverse_dna "CCACGTTTTT"
+    The output should equal 'TTTTTGCACC'
+  End
+End
+
+Describe 'revcomp.sh'
+  Include bin/revcomp.sh
+  It 'makes DNA complement: A->T, T->A, C->G, G->C'
+    When call complement_dna "CCACGTTTTT"
+    The output should equal 'GGTGCAAAAA'
   End
 End
 
 Describe 'revcomp.sh'
   Include bin/revcomp.sh
   It 'makes DNA reverse complement'
-    When call revcomp "AAAAAT"
-    The output should equal 'ATTTTT'
-  End
-End
-
-Describe 'revcomp.sh'
-  Include bin/revcomp.sh
-  It 'makes DNA reverse complement'
-    When call revcomp "ATGCATGC"
+    When call revcomp_dna "ATGCATGC"
     The output should equal 'GCATGCAT'
   End
 End
