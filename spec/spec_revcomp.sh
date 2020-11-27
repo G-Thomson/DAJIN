@@ -1,8 +1,8 @@
 Describe 'revcomp.sh'
   Include bin/revcomp.sh
-  It 'makes DNA reverse complement: A<->T, G<->C'
-    When call revcomp "AAAAAA"
-    The output should equal 'TTTTTT'
+  It 'makes DNA reverse: A->T'
+    When call revcomp "AAAA"
+    The output should equal 'TTTT'
   End
 End
 

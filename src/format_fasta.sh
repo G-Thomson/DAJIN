@@ -65,7 +65,7 @@ convert_revcomp=$(
 if [ "$convert_revcomp" -eq 1 ] ; then
     . DAJIN/bin/revcomp.sh
 
-    revcomp "${design_LF}" > .DAJIN_temp/fasta/fasta_revcomp.fa
+    revcomp_dna "${design_LF}" > .DAJIN_temp/fasta/fasta_revcomp.fa
     design_LF=".DAJIN_temp/fasta/fasta_revcomp.fa"
 fi
 
