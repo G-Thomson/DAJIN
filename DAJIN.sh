@@ -208,7 +208,7 @@ fi
 #? Make temporal directory
 #===========================================================
 
-dirs="fasta fasta_ont sam"
+dirs="fasta fasta_ont sam score"
 echo "${dirs}" |
     sed "s|^|.DAJIN_temp/|g" |
     sed "s| | .DAJIN_temp/|g" |
@@ -221,8 +221,39 @@ xargs mkdir -p
 #! Generate SAM files
 ################################################################################
 
-find .DAJIN_temp/fasta_ont/ -type f -print0 |
-xargs --null -I @ DAJIN/src/minimap2_mapping.sh @ "${threads}"
+find .DAJIN_temp/fasta_ont/ -type f |
+while read -r input; do
+    ./DAJIN/src/classif_mapping.sh "${input}" "${threads}"
+done
+
+################################################################################
+#! Count mutation nucleotides
+################################################################################
+
+find .DAJIN_temp/sam/ -type f |
+awk '{print "DAJIN/src/classif_scoring.sh", $0, "&"}' |
+awk -v th="${threads:-1}" '
+    NR%th == 0 {gsub("&","&\nwait")}1
+    END{print "wait"}' |
+sh - 2>/dev/null
+
+rm .DAJIN_temp/score/tmp_*
+
+################################################################################
+#! Annotate alleles
+################################################################################
+
+find .DAJIN_temp/score/ -type f |
+sed "s|^.*/||" |
+cut -d "_" -f 1 |
+sort -u |
+awk '{print "DAJIN/src/classif_annotate.sh", $0, "&"}' |
+awk -v th="${threads:-1}" '
+    NR%th == 0 {sub("&","&\nwait")}1
+    END{print "wait"}' |
+sh - 2>/dev/null
+
+rm ".DAJIN_temp/score/tmp_*"
 
 # ################################################################################
 # #! NanoSim (v2.5.0)
