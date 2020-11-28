@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC2002,SC2120
 
 ################################################################################
 #! Initialize shell environment

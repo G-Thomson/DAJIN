@@ -1,5 +1,5 @@
 #!/bin/sh
-# shellcheck disable SC2120
+# shellcheck disable=SC2002,SC2120
 
 ################################################################################
 #! Initialize shell environment
@@ -20,22 +20,22 @@ export UNIX_STD=2003  # to make HP-UX conform to POSIX
 
 input_sam=${1}
 
-allele=$(echo ${input_sam##*_} | sed "s/.sam//")
-barcode=$(echo ${input_sam##*/} | cut -d "_" -f 1)
+# allele=$(echo ${input_sam##*_} | sed "s/.sam//")
+# barcode=$(echo ${input_sam##*/} | cut -d "_" -f 1)
 
 #===========================================================
 #? Output
 #===========================================================
 
 mkdir -p .DAJIN_temp/score
-output_score=$(echo ${input_sam%%.sam} | sed "s|sam|score|")
-tmp_prefix=$(echo ${input_sam%%.sam} | sed "s|sam/|score/tmp_|")
+output_score=$(echo "${input_sam%%.sam}" | sed "s|sam|score|")
+tmp_prefix=$(echo "${input_sam%%.sam}" | sed "s|sam/|score/tmp_|")
 
 ################################################################################
 #! Functions
 ################################################################################
 
-mapped_length=$(cat ${input_sam} | awk '$0 ~ /^@/ && $0 ~ "LN" {for(i=1;i<=NF;i++) if($i ~ "LN") {sub("LN:", "", $i); print $i}}')
+mapped_length=$(cat "${input_sam}" | awk '$0 ~ /^@/ && $0 ~ "LN" {for(i=1;i<=NF;i++) if($i ~ "LN") {sub("LN:", "", $i); print $i}}')
 
 count_mutation_in_cstag()(
     if [ -p /dev/stdin ] && [ "$*" = "" ]; then
