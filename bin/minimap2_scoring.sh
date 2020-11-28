@@ -43,7 +43,7 @@ ref_fa=.DAJIN_temp/fasta/wt.fa
 threads=14
 
 true > tmp_score_output
-que_fa=.DAJIN_temp/fasta_ont/barcode21.fa
+que_fa=.DAJIN_temp/fasta_ont/barcode32.fa
 
 find .DAJIN_temp/fasta -type f |
 grep -v -e fasta.fa -e fasta_revcomp.fa |

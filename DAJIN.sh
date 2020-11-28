@@ -208,14 +208,21 @@ fi
 #? Make temporal directory
 #===========================================================
 
-dirs="fasta fasta_conv fasta_ont NanoSim data"
+dirs="fasta fasta_ont sam"
 echo "${dirs}" |
-    sed "s:^:.DAJIN_temp/:g" |
-    sed "s: : .DAJIN_temp/:g" |
+    sed "s|^|.DAJIN_temp/|g" |
+    sed "s| | .DAJIN_temp/|g" |
 xargs mkdir -p
 
 ./DAJIN/src/format_fasta.sh "$design" "$grna"
 ./DAJIN/src/format_fastq.sh "$input_dir" "$threads"
+
+################################################################################
+#! Generate SAM files
+################################################################################
+
+find .DAJIN_temp/fasta_ont/ -type f -print0 |
+xargs --null -I @ DAJIN/src/minimap2_mapping.sh @ "${threads}"
 
 # ################################################################################
 # #! NanoSim (v2.5.0)
