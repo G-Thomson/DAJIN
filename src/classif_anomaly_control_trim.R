@@ -9,7 +9,7 @@ options(future.globals.maxSize = Inf)
 options(warn = -1)
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(tidyverse, furrr, vroom)
+pacman::p_load(tidyverse, vroom)
 
 ################################################################################
 #! I/O naming
@@ -26,6 +26,7 @@ pacman::p_load(tidyverse, furrr, vroom)
 
 args <- commandArgs(trailingOnly = TRUE)
 input_control_score <- args[1]
+threads <- as.integer(args[2])
 
 #===========================================================
 #? Input

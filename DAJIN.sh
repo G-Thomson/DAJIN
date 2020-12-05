@@ -253,7 +253,39 @@ awk -v th="${threads:-1}" '
     END{print "wait"}' |
 sh - 2>/dev/null
 
-rm ".DAJIN_temp/score/tmp_*"
+################################################################################
+#! Anomaly detection
+################################################################################
+
+find .DAJIN_temp/classif/ -type f |
+grep "$control" |
+grep "wt" |
+xargs -I @ Rscript DAJIN/src/classif_anomaly_control_trim.R @ "${threads}"
+
+python DAJIN/src/classif_anomaly_control_lof.py ".DAJIN_temp/classif/tmp_control_score.csv" "${threads}"
+
+find .DAJIN_temp/classif/ -type f |
+grep "csv" |
+grep -v -e "$control" -e "tmp_" |
+xargs -I @ python DAJIN/src/classif_anomaly_sample_lof.py @ "${threads}"
+
+find .DAJIN_temp/classif/ -type f |
+    grep lof$ |
+    sed "s|^.*/||" |
+    cut -d "_" -f 1 |
+    sort -u |
+while read -r barcode; do
+output="$(echo .DAJIN_temp/classif/${barcode}.txt)"
+cat .DAJIN_temp/classif/"${barcode}"*lof |
+    cut -f 1,3 |
+    sort |
+cat > "${output}"
+done
+
+rm .DAJIN_temp/classif/*.sav
+rm .DAJIN_temp/classif/*.csv
+rm .DAJIN_temp/classif/*_lof
+
 
 # ################################################################################
 # #! NanoSim (v2.5.0)
