@@ -208,7 +208,7 @@ fi
 #? Make temporal directory
 #===========================================================
 
-dirs="fasta fasta_ont sam score"
+dirs="fasta fasta_ont sam score classif"
 echo "${dirs}" |
     sed "s|^|.DAJIN_temp/|g" |
     sed "s| | .DAJIN_temp/|g" |
