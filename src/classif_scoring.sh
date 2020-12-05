@@ -35,8 +35,6 @@ tmp_prefix=$(echo "${input_sam%%.sam}" | sed "s|sam/|score/tmp_|")
 #! Functions
 ################################################################################
 
-mapped_length=$(cat "${input_sam}" | awk '$0 ~ /^@/ && $0 ~ "LN" {for(i=1;i<=NF;i++) if($i ~ "LN") {sub("LN:", "", $i); print $i}}')
-
 count_mutation_in_cstag()(
     if [ -p /dev/stdin ] && [ "$*" = "" ]; then
         cat -
@@ -45,7 +43,7 @@ count_mutation_in_cstag()(
     else
         echo "$*"
     fi |
-    awk -v LN="${mapped_length}" '{
+    awk '{
     sum=0
     sub("cs:Z:", "")
     gsub(/[-=+~]/, "")
@@ -53,6 +51,7 @@ count_mutation_in_cstag()(
     gsub(/[acgt]/, " 1 ")
     gsub(/[ACGT]/, " 0 ")
     for(i=1;i<=NF;i++) sum+=$i
+    if(sum == 0) sum=1 # for logarithmic transformation
     print sum }'
 )
 
@@ -72,7 +71,7 @@ mapped_length_in_cstag()(
     gsub(/[acgt]/, " 0 ")
     gsub(/[ACGT]/, " 1 ")
     for(i=1;i<=NF;i++) sum+=$i
-    if(sum == 0) sum=1 # for logarithmic transformation 
+    if(sum == 0) sum=1 # for division 
     print sum }'
 )
 
@@ -97,5 +96,7 @@ cat "${tmp_prefix}.sam" |
     paste "${tmp_prefix}_score" "${tmp_prefix}_length" - |
     awk '{sum[$3" "$4] += ($1/$2)} END {for(key in sum) print key, log(sum[key])}' |
 cat > "${output_score}"
+
+rm "${tmp_prefix}_score" "${tmp_prefix}_length"
 
 exit 0
