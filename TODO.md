@@ -40,6 +40,17 @@
     + [ ] Deletion insertion
     + [ ] Deletion deletion
 
+## ディレクトリ構成
+
+- .DAJIN_temp/mapping/temp
+- .DAJIN_temp/classification/temp
+- .DAJIN_temp/clustering/temp
+- .DAJIN_temp/consensus/temp
+- .DAJIN_temp/igvjs/temp
+
+> .DAJIN_temp/mapping/tempにははじめにCSタグつきのsamファイルを保存する
+> かつ, のちのちBAMファイルの保存先も.DAJIN_temp/mapping/が兼ねる
+
 ## 前処理
 
 + [ ] 脱NanoSim
