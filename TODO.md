@@ -66,18 +66,17 @@
   + [x] `*`の非マップリードは**abnormal**に分類する
   + [x] classifディレクトリに保存する
 
-+ [ ] `classif_anomaly_control_trim.R`
++ [x] `classif_anomaly_control_trim.R`
   + [x] controlの"score"に対して, Hotelling T2を用いて正常のスコアのみを取り出す
   + [x] classifディレクトリに保存する
 
-+ [ ] `classif_anomaly_control_lof.py`
-  + [ ] controlの"score"をLOFにて学習する
-  + [ ] classifディレクトリに保存する
++ [x] `classif_anomaly_control_lof.py`
+  + [x] controlの"score"をLOFにて学習する
+  + [x] classifディレクトリに保存する
 
-+ [ ] `classif_anomaly_sample_lof.py`
-  + [ ] sampleの"score"をLOFに入れて正常アレルと異常アレルを分類する
-  + [ ] 
-  + [ ] classifディレクトリに保存する
++ [x] `classif_anomaly_sample_lof.py`
+  + [x] sampleの"score"をLOFに入れて正常アレルと異常アレルを分類する
+  + [x] classifディレクトリに保存する
 
 ### 異常アレルと正常アレルの分類
 
