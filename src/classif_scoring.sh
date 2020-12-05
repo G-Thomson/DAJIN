@@ -53,7 +53,6 @@ count_mutation_in_cstag()(
     gsub(/[acgt]/, " 1 ")
     gsub(/[ACGT]/, " 0 ")
     for(i=1;i<=NF;i++) sum+=$i
-    if(sum == 0) sum=LN
     print sum }'
 )
 
@@ -73,7 +72,7 @@ mapped_length_in_cstag()(
     gsub(/[acgt]/, " 0 ")
     gsub(/[ACGT]/, " 1 ")
     for(i=1;i<=NF;i++) sum+=$i
-    if(sum == 0) sum=1
+    if(sum == 0) sum=1 # for logarithmic transformation 
     print sum }'
 )
 
@@ -96,7 +95,7 @@ cat > "${tmp_prefix}_length"
 cat "${tmp_prefix}.sam" |
     cut -f 1,3 |
     paste "${tmp_prefix}_score" "${tmp_prefix}_length" - |
-    awk '{sum[$3" "$4] += ($1/$2)} END {for(key in sum) print key, sum[key]}' |
+    awk '{sum[$3" "$4] += ($1/$2)} END {for(key in sum) print key, log(sum[key])}' |
 cat > "${output_score}"
 
 exit 0
