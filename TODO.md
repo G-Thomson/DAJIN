@@ -43,18 +43,41 @@
 ## 前処理
 
 + [ ] 脱NanoSim
-+ [x] サンプルを各アレル（WT, Target, Inversionなど）に対してminimap2でアライメントしたsamファイルを出力する
+
++ [x] `classif_mapping.sh`
+  + [x] サンプルを各アレル（WT, Target, Inversionなど）に対してminimap2でアライメントしてsamファイルを出力する
+  + [x] samディレクトリに保存する
 
 ## 分類
 
 ### 各アレルの分類
 
 + [ ] 脱GPU
+
++ [x] `classif_scoring.sh` スコアを作る
   + [x] 変異塩基数をカウントする
-  + [x] 変異塩基数を非変異塩基数で割り, これを”score”とする（大型欠失アレルでは変異塩基数も非変異塩基数も減るため）
-    + [ ] （異常な大型欠失の場合はマップ塩基数が減って変異塩基数が増えているが, 問題ないか？→異常アレルの判定がしやすいのでよいか？）
-  + [x] 各リードに対してもっとも"score"が小さいアレルをそのアレルとする
-  + [ ] controlの"score"をもとにして異常検知をする
+  + [x] 変異塩基数を非変異塩基数で割る（大型欠失アレルでは変異塩基数も非変異塩基数も減るため）
+  + [x] 割った値に対して対数をとる
+  + [x] scoreディレクトリに保存する
+
+> 異常な大型欠失の場合はマップ塩基数が減って変異塩基数が増えているが, 問題ないか？→異常アレルの判定がしやすいのでよいか？）
+
++ [x] `classif_annotate.sh` 各リードの"score"がもっとも小さいアレルに分類する
+  + [x] `*`の非マップリードは**abnormal**に分類する
+  + [x] classifディレクトリに保存する
+
++ [ ] `classif_anomaly_control_trim.R`
+  + [x] controlの"score"に対して, Hotelling T2を用いて正常のスコアのみを取り出す
+  + [x] classifディレクトリに保存する
+
++ [ ] `classif_anomaly_control_lof.py`
+  + [ ] controlの"score"をLOFにて学習する
+  + [ ] classifディレクトリに保存する
+
++ [ ] `classif_anomaly_sample_lof.py`
+  + [ ] sampleの"score"をLOFに入れて正常アレルと異常アレルを分類する
+  + [ ] 
+  + [ ] classifディレクトリに保存する
 
 ### 異常アレルと正常アレルの分類
 
