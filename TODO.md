@@ -23,11 +23,11 @@
 + .DAJIN_temp/clustering/temp
 + .DAJIN_temp/consensus/temp
 + .DAJIN_temp/igvjs/temp
-+ DAJIN/data
 
 ## データ準備
 
 + [ ] NanoSimによる正常アレルと異常アレル（50bp insertion/deletion）を1000リードずつ用意する
++ `simulation/data`に保存
   + [ ] Tyr c140GC
     + [ ] WT
     + [ ] WT insertion
