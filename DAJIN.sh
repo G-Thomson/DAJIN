@@ -214,8 +214,11 @@ echo "${dirs}" |
     sed "s| | .DAJIN_temp/|g" |
 xargs mkdir -p
 
-./DAJIN/src/format_fasta.sh "$design" "$grna"
-./DAJIN/src/format_fastq.sh "$input_dir" "$threads"
+################################################################################
+#! Preprocess
+################################################################################
+
+./DAJIN/src/preprocess.sh
 
 ################################################################################
 #! Generate SAM files

@@ -1,5 +1,13 @@
 # TODO for DAJIN2
 
+## ディレクトリ構成
+
+- .DAJIN_temp/mapping/temp
+- .DAJIN_temp/classification/temp
+- .DAJIN_temp/clustering/temp
+- .DAJIN_temp/consensus/temp
+- .DAJIN_temp/igvjs/temp
+- DAJIN/data
 ## データ準備
 
 + [ ] NanoSimによる正常アレルと異常アレル（50bp insertion/deletion）を1000リードずつ用意する
@@ -40,26 +48,27 @@
     + [ ] Deletion insertion
     + [ ] Deletion deletion
 
-## ディレクトリ構成
-
-- .DAJIN_temp/mapping/temp
-- .DAJIN_temp/classification/temp
-- .DAJIN_temp/clustering/temp
-- .DAJIN_temp/consensus/temp
-- .DAJIN_temp/igvjs/temp
-
 > .DAJIN_temp/mapping/tempにははじめにCSタグつきのsamファイルを保存する
 > かつ, のちのちBAMファイルの保存先も.DAJIN_temp/mapping/が兼ねる
 
-## 前処理
+## 前処理 `preprocess.sh`
 
 + [ ] 脱NanoSim
 
-+ [x] `classif_mapping.sh`
-  + [x] サンプルを各アレル（WT, Target, Inversionなど）に対してminimap2でアライメントしてsamファイルを出力する
++ [ ] `preprocess_fasta.sh`
+
++ [ ] `preprocess_fastq.sh`
+  + [ ] 変数input_dirに指定されているFASTQディレクトリから`qcat`および`Guppy`を判定する
+  + [ ] `Guppy`スタイルなら`barcode01.fastq`といったフォーマットに変換する
+  + [ ] `qcat`ならなにもしない
+  + [ ] それ以外ならエラー処理
+  + [ ] fasta_ontディレクトリに保存する
+
++ [x] `preprocess_mapping.sh`
+  + [x] fasta_ontにあるサンプルを各アレル（WT, Target, Inversionなど）に対してminimap2でアライメントしてsamファイルを出力する
   + [x] samディレクトリに保存する
 
-## 分類
+## 分類 `classif.sh`
 
 ### 各アレルの分類
 
