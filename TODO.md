@@ -1,13 +1,30 @@
 # TODO for DAJIN2
 
+<!-- markdownlint-disable MD004 MD005 -->
+
+## オプション確認
+
++ [ ] `parse_arguments.sh`
+
+## 依存ソフトウェア確認
+
++ [ ] `check_dependencies.sh`
+  + [ ] samtools
+  + [ ] minimap2
+  + [ ] emboss
+  + [ ] python
+    + [ ] numpy, pandas, sklearn
+  + [ ] R
+
 ## ディレクトリ構成
 
-- .DAJIN_temp/mapping/temp
-- .DAJIN_temp/classification/temp
-- .DAJIN_temp/clustering/temp
-- .DAJIN_temp/consensus/temp
-- .DAJIN_temp/igvjs/temp
-- DAJIN/data
++ .DAJIN_temp/mapping/temp
++ .DAJIN_temp/classification/temp
++ .DAJIN_temp/clustering/temp
++ .DAJIN_temp/consensus/temp
++ .DAJIN_temp/igvjs/temp
++ DAJIN/data
+
 ## データ準備
 
 + [ ] NanoSimによる正常アレルと異常アレル（50bp insertion/deletion）を1000リードずつ用意する
@@ -82,7 +99,8 @@
 
 > 異常な大型欠失の場合はマップ塩基数が減って変異塩基数が増えているが, 問題ないか？→異常アレルの判定がしやすいのでよいか？）
 
-+ [x] `classif_annotate.sh` 各リードの"score"がもっとも小さいアレルに分類する
++ [x] `classif_annotate.sh`
+  + [x] 各リードの"score"がもっとも小さいアレルに分類する
   + [x] `*`の非マップリードは**abnormal**に分類する
   + [x] classifディレクトリに保存する
 

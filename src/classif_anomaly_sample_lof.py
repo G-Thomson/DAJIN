@@ -16,11 +16,6 @@ from sklearn.preprocessing import scale
 
 args = sys.argv
 file_name = args[1]
-threads = int(args[2])
-
-if threads == "":
-    import multiprocessing
-    threads = multiprocessing.cpu_count() // 2
 
 #===========================================================
 #? Input

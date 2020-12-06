@@ -12,10 +12,23 @@ export UNIX_STD=2003  # to make HP-UX conform to POSIX
 
 
 ################################################################################
-#! I/O naming
+#! Input/Output
 ################################################################################
 
-# input: FASTQ, output: FASTA
+input_dir="$1"
+threads="$2"
+
+################################################################################
+#! Save FASTQ to .DAJIN_temp/fastq_ont
+################################################################################
+
 ./DAJIN/src/preprocess_fastq.sh "$input_dir" "$threads"
 
-# input: FASTQ, output: FASTA
+################################################################################
+#! Generate SAM files to '.DAJIN_temp/sam'
+################################################################################
+
+find .DAJIN_temp/fastq_ont/ -type f |
+while read -r input; do
+    ./DAJIN/src/classif_mapping.sh "${input}" "${threads}"
+done
