@@ -16,6 +16,21 @@
     + [ ] numpy, pandas, sklearn
   + [ ] R
 
+## 小さなプログラムに分割
+
++ [ ] check_arguments.sh
++ [ ] check_dependencies.sh
++ [ ] phasing.sh
++ [ ] consensus.sh
++ [ ] igvjs.sh
+
+## 汎用性のあるファイルフォーマットを意識する
+
++ [ ] phasing: input=fastqと参照アレルのfasta, オプションで分類したいアレルのfasta, output=bam
++ [ ] consensus: input=bamと参照アレルのfasta, output=vcfとfastaとhtmlレポート
+  + VCFを入力にするとDAJINの目的以外にも使える
++ [ ] igvjs: input=bamまたはbamファイルを記載したテキスト, output=html (browserポップアップ)
+
 ## ディレクトリ構成
 
 + .DAJIN_temp/mapping/temp
