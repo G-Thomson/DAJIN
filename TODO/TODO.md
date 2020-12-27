@@ -1,6 +1,11 @@
 # TODO for DAJIN2
-
 <!-- markdownlint-disable MD004 MD005 -->
+
+## 必須事項
+
++ 既存のpolyploid phasingと比較したパフォーマンスでSOTA達成
+  + DAJIN1, nPhase, WHATSHAP POLYPHASE
++ 入力と出力を汎用的なフォーマット（FASTA, BAM, VCF）に統一する
 
 ## オプション確認
 
