@@ -90,7 +90,7 @@
 
 ## 前処理 `preprocess.sh`
 
-+ [ ] 脱NanoSim
++ [x] 脱NanoSim
 
 + [ ] `preprocess_fasta.sh`
 
@@ -142,8 +142,10 @@
 
 ## クラスタリング
 
-+ [ ] HDBSCANを2回かませる
-+ [ ] 移動平均をとることで細かなDeletionの変異を無視する
++ [ ] HDBSCANを2回かませてサブアレルを描出する
++ [ ] Point mutation以外では1塩基の微妙な違いをむしろ無視したい
+  + [ ] 5塩基ほど畳み込みをする？
+  + [ ] 移動平均をとることで細かなDeletionの変異を無視する？
 
 ## コンセンサス
 
