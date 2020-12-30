@@ -46,15 +46,12 @@
 
 ## データ準備
 
-+ [ ] NanoSimによる正常アレルと異常アレル（50bp insertion/deletion）を1000リードずつ用意する
-+ `simulation/data`に保存
-  + [ ] Tyr c140GC
-    + [ ] WT
-    + [ ] WT insertion
-    + [ ] WT deletion
-    + [ ] Target
-    + [ ] Target insertion
-    + [ ] Target deletion
++ [ ] NanoSimによる正常アレルと異常アレル（5,10,25,50,100bp indel）を1000リードずつ用意する
+  + [x] Tyr c140GC
+    + [x] WT
+    + [x] WT insertion
+    + [x] WT deletion
+    + [x] Target
   + [ ] Prdm14
     + [ ] WT
     + [ ] WT insertion
