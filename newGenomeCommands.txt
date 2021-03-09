@@ -1,0 +1,5 @@
+# New Genome
+# https://genome.ucsc.edu/goldenpath/help/twoBit.html
+# faToTwoBit ./genome/mm10_no_alt_analysis_set_ENCODE.fasta ./genome/mm10.2bit
+
+# twoBitInfo ./genome/mm10.2bit stdout | sort -k2rn > ./genome/genome.chrom.sizes

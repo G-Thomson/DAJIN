@@ -1,6 +1,8 @@
-design=DAJIN/example/example.fa
-input_dir=DAJIN/example/fastq
+design=./example/example.fa
+input_dir=./example/fastq
 control=barcode01
 output_dir=DAJIN_example
-genome=mm10
+genome_name=./example/example.fa
+genome_loc=UNSC
 grna=CCTGTCCAGAGTGGGAGATAGCC,CCACTGCTAGCTGTGGGTAACCC
+approach=singularity

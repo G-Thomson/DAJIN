@@ -1,4 +1,3 @@
-
 #!/bin/sh
 
 ################################################################################
@@ -20,6 +19,7 @@ export UNIX_STD=2003  # to make HP-UX conform to POSIX
 
 genome="${1}"
 threads="${2}"
+approach="${3}"
 
 #===========================================================
 #? Variable
@@ -56,7 +56,16 @@ if [ "_$target_mutation_type" = "_S" ]; then
     mv .DAJIN_temp/fasta_ont/wt_del* .DAJIN_temp/
 fi
 
+
+if [ $approach = conda ]; then
 ./DAJIN/src/mapping.sh "${genome:-mm10}" "${threads:-1}" || exit 1
+elif [ $approach = singularity ]; then
+./DAJIN/src/local_mapping.sh "${genome}" "${threads:-1}" || exit 1
+else
+    error_exit "${approach}: invalid approach variable (conda/singularity)"
+fi
+
+
 
 if [ "_$target_mutation_type" = "_S" ]; then
     mv .DAJIN_temp/wt_ins* .DAJIN_temp/fasta_ont/
