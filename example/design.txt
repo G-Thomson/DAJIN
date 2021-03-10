@@ -1,5 +1,5 @@
-design=./example/example.fa
-input_dir=./example/fastq
+design=DAJIN/example/example.fa
+input_dir=DAJIN/example/fastq
 control=barcode01
 output_dir=DAJIN_example
 genome_name=./example/example.fa
